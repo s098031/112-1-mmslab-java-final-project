@@ -13,7 +13,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE mytable(month text PRIMARY KEY,date text ,thing NOT NULL)");
+        db.execSQL("CREATE TABLE mytable(month text ,date text ,thing text NOT NULL)");
     }
 
     @Override

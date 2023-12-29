@@ -1,6 +1,7 @@
 package com.example.a112_1_mmslab_java_final_project;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -12,6 +13,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -21,8 +23,9 @@ public class Note extends AppCompatActivity {
     private ArrayList<String> items = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private SQLiteDatabase dbrw;
-    private  Button btn_back;
-
+    private  Button btn_back,btn_note_tutorial;
+    private  String str_update="";
+    private OnInputDialogListener inputDialogListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,8 +108,7 @@ public class Note extends AppCompatActivity {
                     }
                     if(datecheck==1){
                         try {
-                            dbrw.execSQL(
-                                    "INSERT INTO myTable(month, date,thing) VALUES(?,?,?)",
+                            dbrw.execSQL("INSERT INTO myTable(month, date,thing) VALUES(?,?,?)",
                                     new String[]{ed_month.getText().toString(), ed_date.getText().toString(), ed_thing.getText().toString()});
                             showToast("新增:" + ed_month.getText() + "月" + ed_date.getText() + "日   事項:" +ed_thing.getText());
                             cleanEditText();
@@ -119,42 +121,70 @@ public class Note extends AppCompatActivity {
             }
         });
 
+
         findViewById(R.id.btn_update).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*
-                if (ed_date.length() < 1 || ed_thing.length() < 1) {
+
+                if (ed_month.length() < 1 || ed_date.length() < 1 || ed_thing.length() < 1) {
                     showToast("欄位請勿留空");
                 } else {
                     try {
-                        dbrw.execSQL("UPDATE myTable SET price = " + ed_thing.getText() + " WHERE book LIKE '" + ed_date.getText() + "'");
-                        showToast("更新:" + ed_date.getText() + ",價格:" + ed_thing.getText());
-                        cleanEditText();
+                        str_update="";
+                        showInputDialog();
+                        inputDialogListener = new OnInputDialogListener() {
+                            @Override
+                            public void onInputReceived(String str) {
+                                // 这里处理获取到的用户输入
+                                if(str==null){
+                                    showToast("請輸入更新內容");
+                                }else{
+                                    str_update = str;
+                                    String sql = "UPDATE myTable SET thing = ? WHERE month LIKE ? AND date LIKE ? AND thing LIKE ?";
+                                    String[] args = {str_update, ed_month.getText().toString(), ed_date.getText().toString() , "%" + ed_thing.getText() + "%"};
+                                    dbrw.execSQL(sql, args);
+                                    showToast("已將:" + ed_month.getText().toString() + "月" +ed_date.getText().toString() + "日   事項中含有「" + ed_thing.getText() + "」的已修改成 : " + str_update);
+                                    cleanEditText();
+                                    str_update="";
+                                }
+                            }
+                        };
                     } catch (Exception e) {
                         showToast("更新失敗:" + e);
                     }
                 }
-                */
+
             }
         });
 
         findViewById(R.id.btn_delete).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*
-                if (ed_date.length() < 1) {
-                    showToast("書名請勿留空");
-                } else {
-                    try {
-                        dbrw.execSQL("DELETE FROM myTable WHERE book LIKE '" + ed_date.getText() + "'");
-                        showToast("刪除:" + ed_date.getText());
+
+                if (ed_month.length()<1 && ed_date.length() < 1 && ed_thing.length()>=1) {                              //刪除全部的某種事項
+                    dbrw.execSQL("DELETE FROM myTable WHERE thing LIKE '%"+ed_thing.getText()+"%'");
+                    showToast("刪除事項內容含有「" + ed_thing.getText()+"」的項目");
+                    cleanEditText();
+                }else if (ed_month.length()>0 && ed_date.length() < 1 && ed_thing.length()>=1) {                        //刪除某個月的某種類型事項
+                    dbrw.execSQL("DELETE FROM myTable WHERE month LIKE '" + ed_month.getText() + "' AND thing LIKE '%"+ed_thing.getText()+"%'");
+                    showToast("刪除事項內容含有「" + ed_thing.getText()+"」的項目");
+                    cleanEditText();
+                }else if (ed_month.length()>0 && ed_date.length() < 1 && ed_thing.length() <1) {                        //單純刪除某月事項
+                    dbrw.execSQL("DELETE FROM myTable WHERE month LIKE '" + ed_month.getText() + "'");
+                    showToast("刪除:" + ed_month.getText()+"月   事項內容含有「" + ed_thing.getText()+"」的項目");
+                    cleanEditText();
+                }else if (ed_month.length()<1 || ed_date.length() < 1) {
+                    showToast("月份或日期請勿留空");
+                }else {
+                    try {                                                                       //刪除某月某日某類型事項
+                        dbrw.execSQL("DELETE FROM myTable WHERE month LIKE '" + ed_month.getText() + "' AND date LIKE '" + ed_date.getText() + "' AND thing LIKE '%"+ed_thing.getText()+"%'");
+                        showToast("刪除:" + ed_month.getText()+"月"+ed_date.getText() + "日   事項內容含有「" + ed_thing.getText()+"」的項目");
                         cleanEditText();
                     } catch (Exception e) {
                         showToast("刪除失敗:" + e);
                     }
                 }
 
-                 */
             }
         });
 
@@ -162,11 +192,15 @@ public class Note extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                String queryString = (ed_month.length() < 1 || ed_date.length() < 1) ? "SELECT * FROM myTable" : "SELECT * FROM myTable WHERE month LIKE '" + ed_month.getText() + "' AND date LIKE '"+ed_date.getText()+"'";
+                String queryString = (ed_month.length() < 1) ?
+                        "SELECT * FROM myTable ORDER BY month ASC " :
+                        "SELECT * FROM myTable WHERE month LIKE '" + ed_month.getText() +
+                                "' ORDER BY month ASC, date ASC";
+
                 Cursor c = dbrw.rawQuery(queryString,null, null);
                 c.moveToFirst();
                 items.clear();
-                showToast("共有" + c.getCount() + "筆資料");
+                showToast("共有" + c.getCount() + "筆事項");
                 for (int i = 0; i < c.getCount(); i++) {
                     items.add( c.getInt(0) + "月\t\t\t\t" + c.getInt(1)+"日 : "+c.getString(2));
                     c.moveToNext();
@@ -177,17 +211,95 @@ public class Note extends AppCompatActivity {
             }
         });
 
-
-
+        btn_note_tutorial=findViewById(R.id.btn_note_tutorial);
+        btn_note_tutorial.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showInputDialog2();
+            }
+        });
+    }
+    // 在类中声明一个接口用于回调
+    public interface OnInputDialogListener {
+        void onInputReceived(String userInput);
     }
 
+    // 在类中声明一个成员变量用于保存回调
+    private OnInputDialogListener onInputDialogListener;
+
+    // 在 showInputDialog 方法中创建 AlertDialog，并设置按钮点击事件
+    private void showInputDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("輸入改寫資料");
+        builder.setMessage("請勿留白!");
+        // 添加一个编辑框
+        final EditText input = new EditText(this);
+        builder.setView(input);
+
+        // 设置PositiveButton和NegativeButton，并在点击事件中获取输入值并回调
+        builder.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String userInput = input.getText().toString();
+
+                if (userInput.trim().isEmpty()) {
+                    showToast( "請勿留白");
+                } else {
+                    if (inputDialogListener != null) {
+                        inputDialogListener.onInputReceived(userInput);
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 取消时可以不进行任何操作
+            }
+        });
+
+        // 创建并显示对话框
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void showInputDialog2() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("使用說明");
+
+        builder.setMessage("修改與刪除功能接支援模糊搜索，意味著你不用輸入完整內容就可以修改或是提取想要的資料。\n查詢功能只有單月與全部查詢。\n");
+
+        // 设置PositiveButton和NegativeButton，并在点击事件中获取输入值并回调
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+
+
     private void showToast(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 
     private void cleanEditText() {
+
+        ((EditText) findViewById(R.id.ed_month)).setText("");
         ((EditText) findViewById(R.id.ed_date)).setText("");
         ((EditText) findViewById(R.id.ed_thing)).setText("");
+
     }
 
 }
