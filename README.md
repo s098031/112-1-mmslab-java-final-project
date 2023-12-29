@@ -2,7 +2,7 @@
 我們設計了一個實用的APP給健忘且不想常常算錢的大學生用
 
 # layout
-![layout.png](https://github.com/s098031/112-1-mmslab-java-final-project/blob/main/layout.png)
+![layout.png](./layout.png)
 
 
 
