@@ -69,17 +69,17 @@ public class MainActivity extends AppCompatActivity {
                 String str1=tv_func.getText().toString();
                 switch (str1){
                     case "選擇功能:記事本":
-                        intent = new Intent(MainActivity.this, Note.class);
+                         intent = new Intent(MainActivity.this, Note.class);
                         Toast.makeText(MainActivity.this, "Service ! 啟動 !!", Toast.LENGTH_SHORT).show();
                         break;
 
                     case "選擇功能:電子記帳":
-                        intent = new Intent(MainActivity.this, DigitalWallet.class);
+                         intent = new Intent(MainActivity.this, DigitalWallet.class);
                         Toast.makeText(MainActivity.this, "Service ! 啟動 !!", Toast.LENGTH_SHORT).show();
                         break;
 
                     case "選擇功能:債務表":
-                        intent = new Intent(MainActivity.this, ExpensesTracker.class);
+                         intent = new Intent(MainActivity.this, ExpensesTracker.class);
                         Toast.makeText(MainActivity.this, "Service ! 啟動 !!", Toast.LENGTH_SHORT).show();
                         break;
 

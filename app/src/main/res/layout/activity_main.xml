@@ -59,7 +59,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/btn_start"
         app:srcCompat="@drawable/giphy"
-        />
+/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

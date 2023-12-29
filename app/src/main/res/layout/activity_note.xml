@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/ed_month"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/ed_month"
-        />
+/>
 
     <EditText
         android:id="@+id/ed_month"
