@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/ed_borrow"
         app:layout_constraintStart_toEndOf="@+id/ed_lend"
         app:layout_constraintTop_toTopOf="@+id/ed_borrow"
-/>
+        />
 
     <EditText
         android:id="@+id/ed_borrow"
@@ -73,7 +73,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btn_note_tutorial2"
+        android:id="@+id/btn_tutorial"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -106,7 +106,7 @@
         app:layout_constraintEnd_toEndOf="@+id/borrow"
         app:layout_constraintStart_toStartOf="@+id/borrow"
         app:layout_constraintTop_toTopOf="@+id/ed_date"
-/>
+        />
 
     <EditText
         android:id="@+id/ed_date"
