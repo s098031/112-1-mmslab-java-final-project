@@ -7,19 +7,24 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.app.AlertDialog;
+
 
 import java.util.ArrayList;
 
 
 public class DigitalWallet extends AppCompatActivity {
+    private String selectedItemToDelete = "";
+
     private EditText ed_item, ed_date,ed_price;
-    private Button btn_insert, btn_query, btn_update, btn_delete,btn_back;
+    private Button btn_insert, btn_query, btn_update, btn_delete,btn_back,btn_monthly_summary;
     private ListView listView;
     private ArrayAdapter<String> adapter;
     private ArrayList<String> items = new ArrayList<>();
@@ -29,17 +34,96 @@ public class DigitalWallet extends AppCompatActivity {
         String regex = "^(\\d{4})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$";
         return date.matches(regex);
     }
-    private void performQuery() {
-        Cursor c;
-        if (ed_item.length() < 1) {
-            // 使用 ORDER BY 子句按日期排序
-            c = dbrw2.rawQuery("SELECT * FROM myTable ORDER BY date", null);
-        } else {
-            // 使用 ORDER BY 子句按日期排序
-            c = dbrw2.rawQuery("SELECT * FROM myTable WHERE item  LIKE '" +
-                    ed_item.getText().toString() + "' ORDER BY date", null);
+
+    private void showMonthlySummaryDialog() {
+        // 在這裡構建並顯示月結的彈出窗口
+        // 使用AlertDialog.Builder來構建窗口
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("月結");
+
+        // 創建一個ListView，用來顯示每個月的花費總額
+        ListView listView = new ListView(this);
+        builder.setView(listView);
+
+        // 計算每個月的花費總額
+        ArrayList<String> monthlySummaries = calculateMonthlySummaries();
+
+        // 使用ArrayAdapter將每個月的花費總額添加到ListView中
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, monthlySummaries);
+        listView.setAdapter(adapter);
+
+        // 設置確定按鈕
+        builder.setPositiveButton("確定", (dialog, which) -> {
+            // 在這裡處理按下確定按鈕的邏輯
+            dialog.dismiss();
+        });
+
+        // 顯示AlertDialog
+        builder.show();
+    }
+
+    private ArrayList<String> calculateMonthlySummaries() {
+        // 在這裡計算每個月的花費總額，然後返回一個包含結果的ArrayList
+        // 你可以遍歷所有記錄，根據日期計算每個月的花費
+        // 這裡提供一個簡單的例子，實際情況可能需要更複雜的邏輯
+        ArrayList<String> monthlySummaries = new ArrayList<>();
+
+        // 假設記錄的日期格式為yyyy/mm/dd
+        for (String item : items) {
+            String[] parts = item.split("\t\t\t\t");
+            String date = parts[1].replace("日期:", "");
+            //String month = date.substring(0, 6);  // 提取年月部分，例如2023/01
+            String year = date.substring(0, 4);
+            String month = date.substring(4,6);
+            // 檢查是否已經存在該月份的總額
+            boolean found = false;
+            for (int i = 0; i < monthlySummaries.size(); i++) {
+                if (monthlySummaries.get(i).startsWith(month)) {
+                    found = true;
+
+                    // 更新該月份的總額
+                    String[] summaryParts = monthlySummaries.get(i).split(":");
+                    int currentTotal = Integer.parseInt(summaryParts[1].trim());
+                    int newAmount = Integer.parseInt(parts[2].replace("價格:", "").trim());
+                    monthlySummaries.set(i,year + "年" + month + "月: " + (currentTotal + newAmount) + "元");
+                    break;
+                }
+            }
+
+            // 如果該月份還不存在，則添加新的總額
+            if (!found) {
+                monthlySummaries.add(month + ": " + parts[2].replace("價格:", "").trim());
+            }
         }
 
+        return monthlySummaries;
+    }
+
+    private String buildSearchQuery(String input) {
+        // 如果輸入的格式為 yyyyMM，則表示要按年/月搜尋
+        String regex = "^(\\d{4})(0[1-9]|1[0-2])$";
+        if (input.matches(regex)) {
+            String year = input.substring(0, 4);
+            String month = input.substring(4);
+            // 構造 SQL 查詢
+            return "SELECT * FROM myTable WHERE date LIKE '%" +year +month+ "%' ORDER BY date";
+        } else {
+            // 其他情況視為無效輸入，顯示全部記錄
+            return "SELECT * FROM myTable ORDER BY date";
+        }
+    }
+
+    private void performQuery(String query) {
+        Cursor c = dbrw2.rawQuery(query, null);
+        processQueryResult(c);
+    }
+
+    private void performQuery() {
+        // 如果沒有提供查詢語句，預設顯示全部記錄
+        performQuery("SELECT * FROM myTable ORDER BY date");
+    }
+
+    private void processQueryResult(Cursor c) {
         c.moveToFirst();
         items.clear();
         Toast.makeText(DigitalWallet.this, "共有" + c.getCount() + "筆", Toast.LENGTH_SHORT).show();
@@ -47,9 +131,13 @@ public class DigitalWallet extends AppCompatActivity {
             items.add("項目:" + c.getString(0) + "\t\t\t\t日期:" + c.getString(2) + "\t\t\t\t價格:" + c.getString(1));
             c.moveToNext();
         }
-        adapter.notifyDataSetChanged();
+
+        // 使用 runOnUiThread 在主線程執行
+        runOnUiThread(() -> adapter.notifyDataSetChanged());
+
         c.close();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -67,6 +155,8 @@ public class DigitalWallet extends AppCompatActivity {
         ed_price = findViewById(R.id.ed_price);
         btn_query = findViewById(R.id.btn_query);
         btn_insert = findViewById(R.id.btn_insert);
+        btn_monthly_summary = findViewById(R.id.btn_monthly_summary);
+
         btn_update = findViewById(R.id.btn_update);
         btn_delete = findViewById(R.id.btn_delete);
         listView = findViewById(R.id.listView);
@@ -127,20 +217,22 @@ public class DigitalWallet extends AppCompatActivity {
                         Toast.makeText(DigitalWallet.this, "日期格式應為 yyyy/mm/dd", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    String itemToUpdate = ed_item.getText().toString();
-                    String newDate = ed_date.getText().toString();
-                    String newPrice = ed_price.getText().toString();
 
-                    // 使用 ? 占位符，并提供相应的值
-                    dbrw2.execSQL("UPDATE myTable SET date = ?, price = ? WHERE item  LIKE ?",
-                            new String[]{newDate, newPrice, "%" + itemToUpdate + "%"});
+                    // 刪除原來的項目
+                    dbrw2.execSQL("DELETE FROM myTable WHERE item = ?", new String[]{selectedItemToDelete});
 
-                    Toast.makeText(DigitalWallet.this, "更新項目" + itemToUpdate +
-                            "      日期" + newDate + "      價格" + newPrice, Toast.LENGTH_SHORT).show();
+                    // 插入新的項目
+                    dbrw2.execSQL("INSERT INTO myTable(item, price, date) values(?,?,?)",
+                            new Object[]{ed_item.getText().toString(), ed_price.getText().toString(), ed_date.getText().toString()});
+
+                    Toast.makeText(DigitalWallet.this, "更新項目" + ed_item.getText().toString() +
+                            "      日期" + ed_date.getText().toString() + "      價格" + ed_price.getText().toString(), Toast.LENGTH_SHORT).show();
 
                     ed_item.setText("");
                     ed_date.setText("");
                     ed_price.setText("");
+
+                    // 確保更新後刷新列表
                     performQuery();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -148,6 +240,8 @@ public class DigitalWallet extends AppCompatActivity {
                 }
             }
         });
+
+
 
 
         btn_delete.setOnClickListener(view -> {
@@ -171,26 +265,20 @@ public class DigitalWallet extends AppCompatActivity {
 
 
         btn_query.setOnClickListener(view -> {
-            Cursor c;
-            if (ed_item.length() < 1) {
-                // 使用 ORDER BY 子句按日期排序
-                c = dbrw2.rawQuery("SELECT * FROM myTable ORDER BY date", null);
-            } else {
-                // 使用 ORDER BY 子句按日期排序
-                c = dbrw2.rawQuery("SELECT * FROM myTable WHERE item  LIKE '" +
-                        ed_item.getText().toString() + "' ORDER BY date", null);
-            }
+            String input = ed_date.getText().toString().trim();
 
-            c.moveToFirst();
-            items.clear();
-            Toast.makeText(DigitalWallet.this, "共有" + c.getCount() + "筆", Toast.LENGTH_SHORT).show();
-            for (int i = 0; i < c.getCount(); i++) {
-                items.add("項目:" + c.getString(0) + "\t\t\t\t日期:" + c.getString(2) + "\t\t\t\t價格:" + c.getString(1));
-                c.moveToNext();
+            if (input.isEmpty()) {
+                // 如果輸入為空，則顯示全部記錄
+                performQuery("SELECT * FROM myTable ORDER BY date");
+            } else {
+                // 解析輸入，構造 SQL 查詢
+                String sqlQuery = buildSearchQuery(input);
+
+                // 執行查詢
+                performQuery(sqlQuery);
             }
-            adapter.notifyDataSetChanged();
-            c.close();
         });
+
 
         listView.setOnItemClickListener((parent, view, position, id) -> {
             // 點擊 ListView 上的項目時執行的代碼
@@ -201,6 +289,14 @@ public class DigitalWallet extends AppCompatActivity {
             ed_item.setText(parts[0].replace("項目:", ""));
             ed_date.setText(parts[1].replace("日期:", ""));
             ed_price.setText(parts[2].replace("價格:", ""));
+
+            // 記錄點擊的項目
+            selectedItemToDelete = ed_item.getText().toString();
+        });
+
+        btn_monthly_summary.setOnClickListener(view -> {
+            // 在這裡處理月結的邏輯
+            showMonthlySummaryDialog();
         });
 
 
