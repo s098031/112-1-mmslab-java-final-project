@@ -19,12 +19,9 @@ import java.util.ArrayList;
 public class DigitalWallet extends AppCompatActivity {
     private EditText ed_item, ed_date,ed_price;
     private Button btn_insert, btn_query, btn_update, btn_delete,btn_back;
-
     private ListView listView;
-
     private ArrayAdapter<String> adapter;
     private ArrayList<String> items = new ArrayList<>();
-
     private SQLiteDatabase dbrw2;
 
     private boolean isValidDateFormat(String date) {
