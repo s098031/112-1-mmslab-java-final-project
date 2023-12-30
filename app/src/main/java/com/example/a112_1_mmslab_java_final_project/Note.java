@@ -25,7 +25,7 @@ public class Note extends AppCompatActivity {
     private ArrayList<String> items = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private SQLiteDatabase dbrw;
-    private Button btn_back, btn_note_tutorial;
+    private Button btn_back, btn_tutorial;
     private String str_update = "";
     private EditText ed_month,ed_date,ed_thing;
     private OnInputDialogListener inputDialogListener;
@@ -38,7 +38,7 @@ public class Note extends AppCompatActivity {
         ed_date = findViewById(R.id.ed_date);
         ed_thing = findViewById(R.id.ed_thing);
         btn_back = findViewById(R.id.btn_back);
-        btn_note_tutorial = findViewById(R.id.btn_note_tutorial);
+        btn_tutorial = findViewById(R.id.btn_tutorial);
         dbrw = new MyDBHelper(this).getWritableDatabase();
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
         ((ListView) findViewById(R.id.listView)).setAdapter(adapter);
@@ -206,7 +206,7 @@ public class Note extends AppCompatActivity {
         });
 
 
-        btn_note_tutorial.setOnClickListener(new View.OnClickListener() {
+        btn_tutorial.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showInputDialog2();
@@ -252,7 +252,7 @@ public class Note extends AppCompatActivity {
     private void showInputDialog2() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("使用說明");
-        builder.setMessage("修改與刪除功能接支援模糊搜索，意味著你不用輸入完整內容就可以修改或是提取想要的資料。\n查詢功能只有單月與全部查詢。\n");
+        builder.setMessage("修改與刪除功能接支援模糊搜索~\n意味著你不用輸入完整內容就可以修改或是提取想要的資料。\n查詢功能只有單月與全部查詢。\n");
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

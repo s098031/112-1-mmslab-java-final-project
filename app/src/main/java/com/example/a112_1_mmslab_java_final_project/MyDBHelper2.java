@@ -14,7 +14,7 @@ public class MyDBHelper2 extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db2)
     {
-        db2.execSQL("CREATE TABLE myTable(item text PRIMARY KEY, price integer NOT NULL, date text NOT NULL)");
+        db2.execSQL("CREATE TABLE myTable(_id INTEGER PRIMARY KEY AUTOINCREMENT, item text NOT NULL, price integer NOT NULL, date text NOT NULL)");
     }
 
 
