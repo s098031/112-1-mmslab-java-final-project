@@ -3,6 +3,7 @@ package com.example.a112_1_mmslab_java_final_project;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -42,7 +43,7 @@ public class Note extends AppCompatActivity {
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
         ((ListView) findViewById(R.id.listView)).setAdapter(adapter);
         performQuery();
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override

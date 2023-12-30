@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 
 
 public class ExpensesTracker extends AppCompatActivity {
-    private EditText ed_item, ed_date, ed_price;
+    private EditText ed_item, ed_date, ed_price,ed_lend,ed_borrow;
     private Button btn_insert, btn_query, btn_update, btn_delete, btn_back;
     private ListView listView;
     private ArrayAdapter<String> adapter;
@@ -39,41 +40,15 @@ public class ExpensesTracker extends AppCompatActivity {
             c = dbrw3.rawQuery("SELECT * FROM myTable WHERE item  LIKE '" +
                     ed_item.getText().toString() + "' ORDER BY date", null);
         }
-
-        /*
         c.moveToFirst();
         items.clear();
         Toast.makeText(ExpensesTracker.this, "共有" + c.getCount() + "筆", Toast.LENGTH_SHORT).show();
         for (int i = 0; i < c.getCount(); i++) {
-            items.add("項目:" + c.getString(0) + "\t\t\t\t日期:" + c.getString(2) + "\t\t\t\t價格:" + c.getString(1));
+            items.add("借方:" + c.getString(1) + "\t\t\t\t貸方:" + c.getString(2) + "\n項目:" + c.getString(3)+"\n價格:"+c.getString(4)+"\n日期:"+c.getString(5));
             c.moveToNext();
         }
         adapter.notifyDataSetChanged();
         c.close();
-         */
-
-        // 在需要顯示的地方
-        c.moveToFirst();
-        ArrayList<String> items = new ArrayList<>();
-
-        for (int i = 0; i < c.getCount(); i++) {
-            items.add("項目:" + c.getString(0) + "\t\t\t\t日期:" + c.getString(2) + "\t\t\t\t價格:" + c.getString(1));
-            c.moveToNext();
-        }
-
-        c.close();
-
-// 將 items 轉換成 String[] 以供 AlertDialog 使用
-        String[] itemsArray = new String[items.size()];
-        itemsArray = items.toArray(itemsArray);
-
-// 使用 AlertDialog 顯示資料
-        AlertDialog.Builder builder = new AlertDialog.Builder(ExpensesTracker.this);
-        builder.setTitle("資料列表")
-                .setItems(itemsArray, null)
-                .setPositiveButton("確定", null) // 這裡添加確定按鈕，也可以根據需要添加其他按鈕
-                .show();
-
     }
 
     @Override
@@ -86,12 +61,12 @@ public class ExpensesTracker extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expenses_tracker);
-
-        dbrw3 = new MyDBHelper3(this).getWritableDatabase();
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         ed_item = findViewById(R.id.ed_item);
         ed_date = findViewById(R.id.ed_date);
         ed_price = findViewById(R.id.ed_price);
+        ed_lend = findViewById(R.id.ed_lend);
+        ed_borrow = findViewById(R.id.ed_borrow);
         btn_query = findViewById(R.id.btn_query);
         btn_insert = findViewById(R.id.btn_insert);
         btn_update = findViewById(R.id.btn_update);
@@ -99,9 +74,10 @@ public class ExpensesTracker extends AppCompatActivity {
         listView = findViewById(R.id.listView);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
         listView.setAdapter(adapter);
-        dbrw3 = new MyDBHelper2(this).getWritableDatabase();
-
+        dbrw3 = new MyDBHelper3(this).getWritableDatabase();
         btn_back = findViewById(R.id.btn_back2);
+
+        performQuery();
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -116,7 +92,7 @@ public class ExpensesTracker extends AppCompatActivity {
         });
 
         btn_insert.setOnClickListener(view -> {
-            if (ed_item.length() < 1 || ed_date.length() < 1 || ed_price.length() < 1)
+            if (ed_item.length() < 1 || ed_date.length() < 1 || ed_price.length() < 1 || ed_borrow.length() < 1 || ed_lend.length() < 1)
                 Toast.makeText(ExpensesTracker.this, "欄位請勿留空", Toast.LENGTH_SHORT).show();
             else {
                 // 檢查日期格式
@@ -126,10 +102,12 @@ public class ExpensesTracker extends AppCompatActivity {
                 }
 
                 try {
-                    dbrw3.execSQL("INSERT INTO myTable(item, price, date) values(?,?,?)",
-                            new Object[]{ed_item.getText().toString(), ed_price.getText().toString(), ed_date.getText().toString()});
-                    Toast.makeText(ExpensesTracker.this, "新增項目" + ed_item.getText().toString() +
-                            "      日期" + ed_date.getText().toString() + "      價格" + ed_price.getText().toString(), Toast.LENGTH_SHORT).show();
+                    dbrw3.execSQL("INSERT INTO myTable(lend, borrow, item, price, date) values(?,?,?,?,?)",
+                            new Object[]{ed_lend.getText().toString(), ed_borrow.getText().toString(), ed_item.getText().toString(), ed_price.getText().toString(), ed_date.getText().toString()});
+                    Toast.makeText(ExpensesTracker.this, "新增借方:"+ed_lend.getText().toString()+"  貸方:"+ed_borrow.getText().toString()+"\n項目:" + ed_item.getText().toString() +
+                            "\n日期:" + ed_date.getText().toString() + "\n價格:" + ed_price.getText().toString(), Toast.LENGTH_SHORT).show();
+                    ed_lend.setText("");
+                    ed_borrow.setText("");
                     ed_item.setText("");
                     ed_date.setText("");
                     ed_price.setText("");
@@ -143,7 +121,7 @@ public class ExpensesTracker extends AppCompatActivity {
 
 
         btn_update.setOnClickListener(view -> {
-            if (ed_item.length() < 1 || ed_date.length() < 1)
+            if (ed_date.length() < 1 || ed_price.length() < 1 || ed_borrow.length() < 1 || ed_lend.length() < 1)
                 Toast.makeText(ExpensesTracker.this, "欄位請勿留空", Toast.LENGTH_SHORT).show();
             else {
                 try {
@@ -151,6 +129,8 @@ public class ExpensesTracker extends AppCompatActivity {
                         Toast.makeText(ExpensesTracker.this, "日期格式應為 yyyy/mm/dd", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    String newlend= ed_lend.getText().toString();
+                    String newborrow= ed_borrow.getText().toString();
                     String itemToUpdate = ed_item.getText().toString();
                     String newDate = ed_date.getText().toString();
                     String newPrice = ed_price.getText().toString();
@@ -162,6 +142,8 @@ public class ExpensesTracker extends AppCompatActivity {
                     Toast.makeText(ExpensesTracker.this, "更新項目" + itemToUpdate +
                             "      日期" + newDate + "      價格" + newPrice, Toast.LENGTH_SHORT).show();
 
+                    ed_lend.setText("");
+                    ed_borrow.setText("");
                     ed_item.setText("");
                     ed_date.setText("");
                     ed_price.setText("");
@@ -182,6 +164,8 @@ public class ExpensesTracker extends AppCompatActivity {
                     String itemToDelete = ed_item.getText().toString();
                     dbrw3.execSQL("DELETE FROM myTable WHERE item = ?", new String[]{itemToDelete});
                     Toast.makeText(ExpensesTracker.this, "刪除項目" + itemToDelete, Toast.LENGTH_SHORT).show();
+                    ed_lend.setText("");
+                    ed_borrow.setText("");
                     ed_item.setText("");
                     ed_date.setText("");
                     ed_price.setText("");
@@ -204,29 +188,20 @@ public class ExpensesTracker extends AppCompatActivity {
                 c = dbrw3.rawQuery("SELECT * FROM myTable WHERE item  LIKE '" +
                         ed_item.getText().toString() + "' ORDER BY date", null);
             }
-
-
-
-
-
             c.moveToFirst();
             items.clear();
+            Toast.makeText(ExpensesTracker.this, "共有" + c.getCount() + "筆", Toast.LENGTH_SHORT).show();
             for (int i = 0; i < c.getCount(); i++) {
                 items.add("項目:" + c.getString(0) + "\t\t\t\t日期:" + c.getString(2) + "\t\t\t\t價格:" + c.getString(1));
                 c.moveToNext();
             }
+            adapter.notifyDataSetChanged();
             c.close();
             adapter.notifyDataSetChanged();
             // 將 items 轉換成 String[] 以供 AlertDialog 使用
             String[] itemsArray = new String[items.size()];
             itemsArray = items.toArray(itemsArray);
 
-            // 使用 AlertDialog 顯示資料
-            AlertDialog.Builder builder = new AlertDialog.Builder(ExpensesTracker.this);
-            builder.setTitle("資料列表")
-                    .setItems(itemsArray, null)
-                    .setPositiveButton("確定", null) // 這裡添加確定按鈕，也可以根據需要添加其他按鈕
-                    .show();
 
         });
 

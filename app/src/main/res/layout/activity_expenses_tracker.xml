@@ -7,50 +7,49 @@
     tools:context=".DigitalWallet">
 
     <TextView
-        android:id="@+id/item3"
+        android:id="@+id/borrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="8dp"
         android:text="貸方:"
         android:textSize="22sp"
-        app:layout_constraintBottom_toBottomOf="@+id/ed_item3"
-        app:layout_constraintStart_toEndOf="@+id/ed_item2"
-        app:layout_constraintTop_toTopOf="@+id/ed_item3"
-        app:layout_constraintVertical_bias="0.461" />
+        app:layout_constraintBottom_toBottomOf="@+id/ed_borrow"
+        app:layout_constraintStart_toEndOf="@+id/ed_lend"
+        app:layout_constraintTop_toTopOf="@+id/ed_borrow"
+/>
 
     <EditText
-        android:id="@+id/ed_item3"
+        android:id="@+id/ed_borrow"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
         android:ems="10"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/item3"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toEndOf="@+id/borrow"
+        app:layout_constraintTop_toTopOf="@+id/ed_lend"
         tools:ignore="Autofilll,LabelFor" />
 
     <TextView
-        android:id="@+id/item2"
+        android:id="@+id/lend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="借方:"
         android:textSize="22sp"
-        app:layout_constraintBottom_toBottomOf="@+id/ed_item2"
+        app:layout_constraintBottom_toBottomOf="@+id/ed_lend"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/ed_item2"
-        app:layout_constraintVertical_bias="0.461" />
+        app:layout_constraintTop_toTopOf="@+id/ed_lend" />
 
     <EditText
-        android:id="@+id/ed_item2"
+        android:id="@+id/ed_lend"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
         android:ems="10"
         android:inputType="textPersonName"
-        app:layout_constraintStart_toEndOf="@+id/item2"
+        app:layout_constraintStart_toEndOf="@+id/lend"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="Autofilll,LabelFor" />
 
@@ -58,7 +57,7 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="電子記帳"
+        android:text="債務表"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -69,19 +68,20 @@
         android:layout_weight="1"
         android:text="回到主頁"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btn_note_tutorial2"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.346"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btn_note_tutorial2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="100dp"
         android:layout_weight="1"
         android:text="使用說明"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.682"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/item"
@@ -91,33 +91,34 @@
         android:text="項目:"
         android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="@+id/ed_item"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/lend"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/lend"
         app:layout_constraintTop_toTopOf="@+id/ed_item" />
 
     <TextView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
         android:text="日期:"
         android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="@+id/ed_date"
-        app:layout_constraintStart_toEndOf="@+id/ed_price"
+        app:layout_constraintEnd_toEndOf="@+id/borrow"
+        app:layout_constraintStart_toStartOf="@+id/borrow"
         app:layout_constraintTop_toTopOf="@+id/ed_date"
-        app:layout_constraintVertical_bias="0.461" />
+/>
 
     <EditText
         android:id="@+id/ed_date"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="3dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
         android:ems="10"
         android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/ed_item"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/date"
-        app:layout_constraintTop_toBottomOf="@+id/ed_item"
+        app:layout_constraintTop_toTopOf="@+id/ed_price"
         tools:ignore="Autofilll,LabelFor" />
 
     <TextView
@@ -128,18 +129,19 @@
         android:text="價格:"
         android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="@+id/ed_price"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/item"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/item"
         app:layout_constraintTop_toTopOf="@+id/ed_price" />
 
     <EditText
         android:id="@+id/ed_price"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
         android:layout_marginTop="12dp"
         android:ems="10"
         android:inputType="number"
-        app:layout_constraintStart_toEndOf="@+id/price"
+        app:layout_constraintStart_toStartOf="@+id/ed_item"
         app:layout_constraintTop_toBottomOf="@+id/ed_item"
         tools:ignore="Autofilll,LabelFor" />
 
@@ -147,14 +149,12 @@
         android:id="@+id/ed_item"
         android:layout_width="345dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
         android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
         android:ems="10"
         android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/item"
-        app:layout_constraintTop_toBottomOf="@+id/ed_item2"
+        app:layout_constraintEnd_toEndOf="@+id/ed_borrow"
+        app:layout_constraintStart_toEndOf="@+id/lend"
+        app:layout_constraintTop_toBottomOf="@+id/ed_lend"
         tools:ignore="Autofilll,LabelFor" />
 
     <LinearLayout
@@ -163,9 +163,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.454"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/ed_date"
+        app:layout_constraintStart_toStartOf="@+id/price"
         app:layout_constraintTop_toBottomOf="@+id/ed_price">
 
         <Button
@@ -207,9 +206,12 @@
 
     <ListView
         android:id="@+id/listView"
-        android:layout_width="401dp"
-        android:layout_height="452dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_back2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/LinearLayout" />

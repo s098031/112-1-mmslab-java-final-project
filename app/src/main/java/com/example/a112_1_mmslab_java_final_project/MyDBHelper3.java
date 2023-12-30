@@ -14,7 +14,7 @@ public class MyDBHelper3 extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db3)
     {
-        db3.execSQL("CREATE TABLE myTable(item text PRIMARY KEY, price integer NOT NULL, date text NOT NULL)");
+        db3.execSQL("CREATE TABLE myTable(_id INTEGER PRIMARY KEY AUTOINCREMENT,lend text NOT NULL,borrow text NOT NULL,item text NOT NULL, price integer NOT NULL, date text NOT NULL)");
     }
 
 
