@@ -2,15 +2,27 @@
 我們設計了一個實用的APP給健忘且不想常常算錢的大學生用
 
 # 功能介紹
+## 記事本
+
+可以
+
+
+![記事本.jpg](./Demo/記事本.jpg)
+
+## 電子記帳(目前僅支援支出)
 
 
 
-# layout(感謝某靈魂繪手提供)
-![layout.png](./layout.png)
+![電子記帳.jpg](./Demo/電子記帳.jpg)
+
+## 債務表
 
 
 
+![債務表.jpg](./Demo/債務表.jpg)
 
 # Demo Video （？
-![image](https://github.com/s098031/112-1-mmslab-java-final-project/assets/68554490/46aff49b-e8eb-4df4-bc7b-28e4a20c114b)
+https://www.youtube.com/watch?v=zVU0vQM7wKA
+
+![QRcode.jpg](./Demo/QRcode.jpg)
 
