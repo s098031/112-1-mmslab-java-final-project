@@ -182,14 +182,20 @@ public class ExpensesTracker extends AppCompatActivity {
 
 
         btn_delete.setOnClickListener(view -> {
-            if (ed_lend.length() < 1 &&ed_borrow.length() < 1 &&ed_date.length() < 1 && ed_price.length() < 1 && ed_item.length() >= 1) {                  //刪除全部的某種事項
-                dbrw3.execSQL("DELETE FROM myTable WHERE thing LIKE '%" + ed_item.getText() + "%'");
+            if (ed_lend.length() < 1 && ed_borrow.length() < 1 &&ed_date.length() < 1 && ed_price.length() < 1 && ed_item.length() >0) {                  //刪除全部的某種事項
+                dbrw3.execSQL("DELETE FROM myTable WHERE item LIKE '%" + ed_item.getText() + "%'");
                 Toast.makeText(ExpensesTracker.this, "刪除事項內容含有「" + ed_item.getText() + "」的項目", Toast.LENGTH_SHORT).show();
 
-            }else{
+            }else if((id_item !="" && ed_lend.length() > 0 && ed_borrow.length() > 0 &&ed_date.length() > 0 && ed_price.length() > 0 && ed_item.length() >0)){
+                dbrw3.execSQL("DELETE FROM myTable WHERE _id LIKE '"+id_item+"' AND lend LIKE '" + ed_lend.getText() + "' AND borrow LIKE '" + ed_borrow.getText() + "' AND item LIKE '" + ed_item.getText() + "' AND date LIKE '" + ed_date.getText() + "' AND price LIKE '" + ed_price.getText() + "'");
+                Toast.makeText(ExpensesTracker.this, "刪除的資料:\n借方:"+ed_lend.getText().toString()+"\t\t\t\t貸方:"+ed_borrow.getText().toString()+"\n項目:" + ed_item.getText().toString() +
+                        "\n日期:" + ed_date.getText().toString() + "\n價格:" + ed_price.getText().toString(), Toast.LENGTH_SHORT).show();
+            }else if((ed_lend.length() > 0 && ed_borrow.length() > 0 &&ed_date.length() > 0 && ed_price.length() > 0 && ed_item.length() >0)){
                 dbrw3.execSQL("DELETE FROM myTable WHERE lend LIKE '" + ed_lend.getText() + "' AND borrow LIKE '" + ed_borrow.getText() + "' AND item LIKE '" + ed_item.getText() + "' AND date LIKE '" + ed_date.getText() + "' AND price LIKE '" + ed_price.getText() + "'");
                 Toast.makeText(ExpensesTracker.this, "刪除的資料:\n借方:"+ed_lend.getText().toString()+"\t\t\t\t貸方:"+ed_borrow.getText().toString()+"\n項目:" + ed_item.getText().toString() +
-                        "\n日期:" + ed_date.getText().toString() + "\n價格:" + ed_price.getText().toString(), Toast.LENGTH_LONG).show();
+                        "\n日期:" + ed_date.getText().toString() + "\n價格:" + ed_price.getText().toString(), Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(ExpensesTracker.this,"無資料刪除", Toast.LENGTH_SHORT).show();
             }
             performQuery();
             ed_lend.setText("");

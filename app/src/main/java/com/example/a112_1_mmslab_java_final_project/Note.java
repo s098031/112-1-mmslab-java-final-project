@@ -26,9 +26,10 @@ public class Note extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private SQLiteDatabase dbrw;
     private Button btn_back, btn_tutorial;
-    private String str_update = "";
+    private ListView listView;
     private EditText ed_month,ed_date,ed_thing;
     private OnInputDialogListener inputDialogListener;
+    private String  oldMonth,oldDate,oldThing,id_item;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,7 @@ public class Note extends AppCompatActivity {
         ed_thing = findViewById(R.id.ed_thing);
         btn_back = findViewById(R.id.btn_back);
         btn_tutorial = findViewById(R.id.btn_tutorial);
+        listView=findViewById(R.id.listView);
         dbrw = new MyDBHelper(this).getWritableDatabase();
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
         ((ListView) findViewById(R.id.listView)).setAdapter(adapter);
@@ -56,7 +58,22 @@ public class Note extends AppCompatActivity {
                 finish();
             }
         });
-
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            // 點擊 ListView 上的項目時執行的代碼
+            String selectedItem = items.get(position);
+            String[] parts = selectedItem.split("\t\t\t\t");
+            // 將點擊的項目信息填充到對應的 EditText 中
+            ed_month.setText(parts[0].replace("月", ""));
+            ed_date.setText(parts[1].replace("日 :", ""));
+            ed_thing.setText(parts[2]);
+            oldMonth = ed_month.getText().toString();
+            oldDate = ed_date.getText().toString();
+            oldThing = ed_thing.getText().toString();
+            Cursor c= dbrw.rawQuery("SELECT * FROM myTable WHERE month LIKE '" + oldMonth + "' AND date LIKE '"+oldDate+ "' AND thing LIKE '"+oldThing+ "' ORDER BY date", null);
+            c.moveToFirst();
+            id_item = c.getString(0);
+            c.close();
+        });
         findViewById(R.id.btn_insert).setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -122,26 +139,12 @@ public class Note extends AppCompatActivity {
                     showToast("欄位請勿留空");
                 } else {
                     try {
-                        str_update = "";
-                        showInputDialog();
-                        inputDialogListener = new OnInputDialogListener() {
-                            @Override
-                            public void onInputReceived(String str) {
-                                // 这里处理获取到的用户输入
-                                if (str == null) {
-                                    showToast("請輸入更新內容");
-                                } else {
-                                    str_update = str;
-                                    String sql = "UPDATE myTable SET thing = ? WHERE month LIKE ? AND date LIKE ? AND thing LIKE ?";
-                                    String[] args = {str_update, ed_month.getText().toString(), ed_date.getText().toString(), "%" + ed_thing.getText() + "%"};
-                                    dbrw.execSQL(sql, args);
-                                    showToast("已將:" + ed_month.getText().toString() + "月" + ed_date.getText().toString() + "日   事項中含有「" + ed_thing.getText() + "」的已修改成 : " + str_update);
-                                    cleanEditText();
-                                    str_update = "";
-                                    performQuery();
-                                }
-                            }
-                        };
+                        String sql = "UPDATE myTable SET month=? ,date=?,thing = ? WHERE _id LIKE ? AND month LIKE ? AND date LIKE ? AND thing LIKE ?";
+                        String[] args = {ed_month.getText().toString(), ed_date.getText().toString(), ed_thing.getText().toString(),id_item, oldMonth,oldDate, oldThing };
+                        dbrw.execSQL(sql, args);
+                        showToast("已修改成:" + ed_month.getText().toString() + "月" + ed_date.getText().toString() + "日 :" + ed_thing.getText());
+                        cleanEditText();
+                        performQuery();
                     } catch (Exception e) {
                         showToast("更新失敗:" + e);
                     }
@@ -153,30 +156,33 @@ public class Note extends AppCompatActivity {
         findViewById(R.id.btn_delete).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (ed_month.length() < 1 && ed_date.length() < 1 && ed_thing.length() >= 1) {                              //刪除全部的某種事項
+                if (ed_month.length() > 0 && ed_date.length() > 0 && ed_thing.length() > 0) {                              //刪除全部的某種事項
+                    dbrw.execSQL("DELETE FROM myTable WHERE _id LIKE '"+id_item+"'");
+                    showToast("刪除"+ed_month.getText().toString()+"月"+ed_date.getText().toString()+"日 :"+ed_thing.getText().toString());
+                    cleanEditText();
+                    performQuery();
+                } else if (ed_month.length() < 1 && ed_date.length() < 1 && ed_thing.length() >= 1) {                              //刪除全部的某種事項
                     dbrw.execSQL("DELETE FROM myTable WHERE thing LIKE '%" + ed_thing.getText() + "%'");
                     showToast("刪除事項內容含有「" + ed_thing.getText() + "」的項目");
                     cleanEditText();
+                    performQuery();
                 } else if (ed_month.length() > 0 && ed_date.length() < 1 && ed_thing.length() >= 1) {                        //刪除某個月的某種類型事項
                     dbrw.execSQL("DELETE FROM myTable WHERE month LIKE '" + ed_month.getText() + "' AND thing LIKE '%" + ed_thing.getText() + "%'");
                     showToast("刪除事項內容含有「" + ed_thing.getText() + "」的項目");
                     cleanEditText();
+                    performQuery();
                 } else if (ed_month.length() > 0 && ed_date.length() < 1 && ed_thing.length() < 1) {                        //單純刪除某月事項
                     dbrw.execSQL("DELETE FROM myTable WHERE month LIKE '" + ed_month.getText() + "'");
                     showToast("刪除:" + ed_month.getText() + "月   事項內容含有「" + ed_thing.getText() + "」的項目");
                     cleanEditText();
+                    performQuery();
                 } else if (ed_month.length() < 1 || ed_date.length() < 1) {
                     showToast("月份或日期請勿留空");
-                } else {
-                    try {                                                                       //刪除某月某日某類型事項
-                        dbrw.execSQL("DELETE FROM myTable WHERE month LIKE '" + ed_month.getText() + "' AND date LIKE '" + ed_date.getText() + "' AND thing LIKE '%" + ed_thing.getText() + "%'");
-                        showToast("刪除:" + ed_month.getText() + "月" + ed_date.getText() + "日   事項內容含有「" + ed_thing.getText() + "」的項目");
-                        cleanEditText();
-                        performQuery();
-                    } catch (Exception e) {
-                        showToast("刪除失敗:" + e);
-                    }
+                } else {                     //刪除某月某日某類型事項
+                    dbrw.execSQL("DELETE FROM myTable WHERE month LIKE '" + ed_month.getText() + "' AND date LIKE '" + ed_date.getText() + "' AND thing LIKE '%" + ed_thing.getText() + "%'");
+                    showToast("刪除:" + ed_month.getText() + "月" + ed_date.getText() + "日   事項內容含有「" + ed_thing.getText() + "」的項目");
+                    cleanEditText();
+                    performQuery();
                 }
 
             }
@@ -196,7 +202,7 @@ public class Note extends AppCompatActivity {
                 items.clear();
                 showToast("共有" + c.getCount() + "筆事項");
                 for (int i = 0; i < c.getCount(); i++) {
-                    items.add(c.getInt(0) + "月\t\t\t\t" + c.getInt(1) + "日 : " + c.getString(2));
+                    items.add(c.getInt(1) + "月\t\t\t\t" + c.getInt(2) + "日 :\t\t\t\t" + c.getString(3));
                     c.moveToNext();
                 }
                 adapter.notifyDataSetChanged();
@@ -220,39 +226,11 @@ public class Note extends AppCompatActivity {
 
     private OnInputDialogListener onInputDialogListener;
 
-    private void showInputDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("輸入改寫資料");
-        builder.setMessage("請勿留白!");
-        final EditText input = new EditText(this);
-        builder.setView(input);
-        builder.setPositiveButton("確定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String userInput = input.getText().toString();
-
-                if (userInput.trim().isEmpty()) {
-                    showToast("請勿留白");
-                } else {
-                    if (inputDialogListener != null) {
-                        inputDialogListener.onInputReceived(userInput);
-                    }
-                }
-            }
-        });
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-    }
 
     private void showInputDialog2() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("使用說明");
-        builder.setMessage("修改與刪除功能接支援模糊搜索~\n意味著你不用輸入完整內容就可以修改或是提取想要的資料。\n查詢功能只有單月與全部查詢。\n");
+        builder.setMessage("修改項目可以直接點及ListView中的項目進行修改\n刪除功能接支援模糊搜索，不用輸入完整內容就可以刪除資料。\n(謹慎使用，可能刪除相同內容不同月份的資料。)\n查詢功能只有單月與全部月份查詢。\n");
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -300,7 +278,7 @@ public class Note extends AppCompatActivity {
         items.clear();
         showToast("共有" + c.getCount() + "筆事項");
         for (int i = 0; i < c.getCount(); i++) {
-            items.add( c.getInt(0) + "月\t\t\t\t" + c.getInt(1)+"日 : "+c.getString(2));
+            items.add( c.getInt(1) + "月\t\t\t\t" + c.getInt(2)+"日 :\t\t\t\t"+c.getString(3));
             c.moveToNext();
         }
         adapter.notifyDataSetChanged();
@@ -312,4 +290,6 @@ public class Note extends AppCompatActivity {
         dbrw.close();
         super.onDestroy();
     }
+
+
 }

@@ -1,7 +1,11 @@
 # 112-1-mmslab-java-final-project
 我們設計了一個實用的APP給健忘且不想常常算錢的大學生用
 
-# layout
+# 功能介紹
+
+
+
+# layout(感謝某靈魂繪手提供)
 ![layout.png](./layout.png)
 
 

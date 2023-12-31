@@ -93,7 +93,7 @@ public class DigitalWallet extends AppCompatActivity {
         if(SummaryMonth == true){
             monthlySummaries.add(year + "年" + month + "月: " + currentTotal + "元");
         }else{
-            monthlySummaries.add("截至"+year + "年" + month + "月: " + currentTotal + "元");
+            monthlySummaries.add("表中支出總計為: " + currentTotal + "元");
         }
         return monthlySummaries;
     }
@@ -275,7 +275,7 @@ public class DigitalWallet extends AppCompatActivity {
             else {
                 try {
                     String itemToDelete = ed_item.getText().toString();
-                    dbrw2.execSQL("DELETE FROM myTable WHERE item = ?", new String[]{itemToDelete});
+                    dbrw2.execSQL("DELETE FROM myTable WHERE _id=? AND item = ?", new String[]{id_item, itemToDelete});
                     Toast.makeText(DigitalWallet.this, "刪除項目" + itemToDelete, Toast.LENGTH_SHORT).show();
                     ed_item.setText("");
                     ed_date.setText("");
@@ -298,10 +298,19 @@ public class DigitalWallet extends AppCompatActivity {
             }
             else if(!isValidDateFormatMM(ed_date.getText().toString()))
             {
-                Toast.makeText(DigitalWallet.this, "日期格式應為 yyyy/mm", Toast.LENGTH_SHORT).show();
-                items.clear();
-                adapter.notifyDataSetChanged();
-                return;
+                if(isValidDateFormat(ed_date.getText().toString()))
+                {
+                    performQuery("SELECT * FROM myTable WHERE date LIKE '"+ed_date.getText().toString()+"' ORDER BY date");
+                    ed_item.setText("");
+                    ed_date.setText("");
+                    ed_price.setText("");
+                }else{
+                    Toast.makeText(DigitalWallet.this, "日期格式應為 yyyy/mm/(dd)", Toast.LENGTH_SHORT).show();
+                    items.clear();
+                    adapter.notifyDataSetChanged();
+                    return;
+                }
+
             }
             else {
                 // 解析輸入，構造 SQL 查詢
@@ -335,6 +344,34 @@ public class DigitalWallet extends AppCompatActivity {
         });
 
         btn_monthly_summary.setOnClickListener(view -> {
+            String input = ed_date.getText().toString().trim();
+            if (input.isEmpty()) {
+                // 如果輸入為空，則顯示全部記錄
+                performQuery("SELECT * FROM myTable ORDER BY date");
+            }
+            else if(!isValidDateFormatMM(ed_date.getText().toString()))
+            {
+                if(isValidDateFormat(ed_date.getText().toString()))
+                {
+                    performQuery("SELECT * FROM myTable WHERE date LIKE '"+ed_date.getText().toString()+"' ORDER BY date");
+                    ed_item.setText("");
+                    ed_date.setText("");
+                    ed_price.setText("");
+                }else{
+                    Toast.makeText(DigitalWallet.this, "日期格式應為 yyyy/mm/(dd)", Toast.LENGTH_SHORT).show();
+                    items.clear();
+                    adapter.notifyDataSetChanged();
+                    return;
+                }
+
+            }
+            else {
+                // 解析輸入，構造 SQL 查詢
+                String sqlQuery = buildSearchQuery(input);
+
+                // 執行查詢
+                performQuery(sqlQuery);
+            }
             // 在這裡處理月結的邏輯
             SummaryMonth =(ed_date.length()<1) ? false : true;
             // 在這裡處理月結的邏輯
