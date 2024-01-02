@@ -1,4 +1,8 @@
 # 112-1-mmslab-java-final-project
+
+簡報：
+https://www.canva.com/design/DAF4Oj9fIjc/vncS-SA3jpDexBO3ZH8zYg/edit
+
 我們設計了一個實用的APP給健忘且不想常常算錢的大學生用
 
 (P.S.由於程式內塞了小彩蛋的原因，HTML的比例才會高達99%。實際上功能實現都是靠JAVA與SQLite去實現)
