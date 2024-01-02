@@ -30,18 +30,8 @@ public class GodGame extends AppCompatActivity {
 
 
         webView.setWebViewClient(new WebViewClient());
-
-
-
-        //url="http://112.104.128.194";
-        //url="http://112.104.128.194/dashboard/Degrees%20of%20Lewdity/Degrees%20of%20Lewdity.html";
-        //url="file:///android_asset/Degrees of Lewdity/Degrees of Lewdity.html";
-        url = "file:///android_asset/Degrees%20of%20Lewdity/Degrees%20of%20Lewdity.html";
-
+        url = "file:///android_asset/game/game.html";
         webView.loadUrl(url);
-        //new NetworkTask().execute("http://112.104.128.194/");
-        //new NetworkTask().execute("112.104.128.194:80");
-        //new NetworkTask().execute("https://www.youtube.com/watch?v=SAL_htf83XU&ab_channel=%E9%AD%9A%E4%B9%BE");
     }
     private static final int MY_PERMISSIONS_REQUEST = 123;
 
